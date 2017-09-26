@@ -109,7 +109,17 @@ namespace SymbolSource.Gateway.NuGet.Core
 
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext)
         {
-            return null;
+            var package = (Package)entity;
+
+            var rootUrlConfig = System.Configuration.ConfigurationManager.AppSettings["rootUrl"];
+            var rootUrl = !string.IsNullOrWhiteSpace(rootUrlConfig)
+                ? rootUrlConfig
+                : HttpContext.Current.Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+
+            // the URI need to ends with a '/' to be correctly merged so we add it to the application if it 
+            var downloadUrl = PackageUtility.GetPackageDownloadUrl(package);
+
+            return new Uri(new Uri(rootUrl), downloadUrl);
         }
 
         public string GetStreamContentType(object entity, DataServiceOperationContext operationContext)
